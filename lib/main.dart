@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
+import 'package:flutter_demo/ui/daily_share.dart';
+
+import 'package:flutter_demo/ui/radom_words.dart';
 
 void main() => runApp(MyApp());
 
@@ -7,96 +9,57 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-        title: 'Welcome to Flutter', 
-        theme: new ThemeData(primaryColor: Colors.white),
-        home: new RandomWords());
+        title: 'Welcome to Flutter',
+        theme: new ThemeData(
+          primarySwatch: Colors.green,
+        ),
+        home: new Home(),
+        routes: {
+          RandomWords.sName: (context) => new RandomWords(),
+        });
   }
 }
 
-class RandomWords extends StatefulWidget {
+class Home extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return new RandomWordsState();
+    return new HomeState();
   }
 }
 
-class RandomWordsState extends State<RandomWords> {
-  final _suggestions = <WordPair>[];
-  final _biggerFont = const TextStyle(fontSize: 18.0);
-
-  final _saved = new Set<WordPair>();
+class HomeState extends State<Home> {
+  int _currentIndex = 0;
+  final List<Widget> _children = [
+    new RandomWords(), new DailyShareListPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Statup Name Generator'),
-        actions: <Widget>[
-          new IconButton(icon: new Icon(Icons.list), onPressed: _pushSaved)
-        ],
+        title: new Text(
+          'Home',
+        ),
       ),
-      body: _buildSuggestions(),
-    );
-  }
-
-  Widget _buildSuggestions() {
-    return new ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemBuilder: (context, i) {
-        if (i.isOdd) return new Divider();
-
-        final index = i ~/ 2;
-        if (index >= _suggestions.length) {
-          _suggestions.addAll(generateWordPairs().take(10));
-        }
-        return _buildRow(_suggestions[index]);
-      },
-    );
-  }
-
-  Widget _buildRow(WordPair pair) {
-    final alreadySaved = _saved.contains(pair);
-    return new ListTile(
-      title: new Text(
-        pair.asPascalCase,
-        style: _biggerFont,
-      ),
-      trailing: new Icon(
-        alreadySaved ? Icons.favorite : Icons.favorite_border,
-        color: alreadySaved ? Colors.red : null,
-      ),
-      onTap: () {
-        setState(() {
-          if (alreadySaved) {
-            _saved.remove(pair);
-          } else {
-            _saved.add(pair);
-          }
-        });
-      },
-    );
-  }
-
-  void _pushSaved() {
-    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-      final titles = _saved.map((pair) {
-        return new ListTile(
-          title: new Text(
-            pair.asPascalCase,
-            style: _biggerFont,
+      body: IndexedStack(index: _currentIndex, children: _children,),
+      bottomNavigationBar: new BottomNavigationBar(
+        items: [
+          new BottomNavigationBarItem(
+            icon: new Icon(Icons.account_balance),
+            title: new Text("list")
           ),
-        );
-      });
-      final divided =
-          ListTile.divideTiles(tiles: titles, context: context).toList();
-      return new Scaffold(
-        appBar: new AppBar(
-          title: new Text('Saved Suggestions'),
-        ),
-        body: new ListView(
-          children: divided,
-        ),
-      );
-    }));
+          new BottomNavigationBarItem(
+            icon: new Icon(Icons.account_balance_wallet),
+            title: new Text("share")
+          ),
+        ],
+        currentIndex: _currentIndex,
+        onTap: (int index) => {
+          setState(() {
+            _currentIndex = index;
+          })
+        },
+      ),
+    );
   }
 }
