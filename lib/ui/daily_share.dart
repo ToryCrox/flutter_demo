@@ -2,12 +2,13 @@
 // api: https://bms2.mimikko.cn/api/v1/public/daily_buzz/articles?offset=0&limit=25
 // api: https://api1.mimikko.cn/booklet/daily_buzz/articles/latest
 
-import 'dart:isolate';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/bean/daily_share.dart';
+
+import 'daily_share_detail.dart';
 
 const dailyShareListUrl =
     "https://bms2.mimikko.cn/api/v1/public/daily_buzz/articles";
@@ -49,7 +50,7 @@ class DailyShareListPageState extends State<DailyShareListPage> {
             return _buildItem(_dailyShares[index - 2]);
           },
           separatorBuilder: (context, index) {
-            if (index != 0) {
+            if (index > 2) {
               return new Container(
                 padding: EdgeInsets.only(left: 10, right: 10),
                 child: Divider(
@@ -135,6 +136,10 @@ class DailyShareListPageState extends State<DailyShareListPage> {
     return new Padding(
       padding: EdgeInsets.all(10),
       child: new Card(
+        elevation: 5,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10))),
         child: InkWell(
           onTap: () => _turnDailyShare(share),
           child: _buildTopImage(share),
@@ -151,8 +156,9 @@ class DailyShareListPageState extends State<DailyShareListPage> {
         new CachedNetworkImage(
           imageUrl:
               share.coverImage + "?x-oss-process=image/resize,m_mfit,w_300",
-          fit: BoxFit.fitWidth,
+          fit: BoxFit.cover,
           width: double.infinity,
+          height: 150,
         ),
         new Positioned(
           child: new Text(
@@ -222,5 +228,8 @@ class DailyShareListPageState extends State<DailyShareListPage> {
     );
   }
 
-  _turnDailyShare(DailyShare share) {}
+  _turnDailyShare(DailyShare share) {
+    Navigator.of(context)
+        .push(new MaterialPageRoute(builder: (context) => new DailyShareDetail(share.id)));
+  }
 }
